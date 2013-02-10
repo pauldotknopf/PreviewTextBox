@@ -4,7 +4,18 @@
         xmlns:custom="clr-namespace:WPFAutoSelectTextBox"
         Title="MainWindow" Height="350" Width="525">
     <StackPanel>
-        <custom:AutoSelectTextBox AutoSelectText="{Binding Text, ElementName=TbAutoSelectText}"></custom:AutoSelectTextBox>
-        <TextBox Name="TbAutoSelectText" />
+        <TextBlock Text="Auto select texbox" />
+        <custom:AutoSelectTextBox x:Name="TbAutoSelectTextBox"></custom:AutoSelectTextBox>
+        <TextBlock Text="Autio select text 1" />
+        <TextBox x:Name="TbAutoSelectText1" />
+        <TextBlock Text="Autio select text 2" />
+        <TextBox x:Name="TbAutoSelectText2" />
+        <TextBlock Text="Text" />
+        <TextBlock Text="{Binding Text, ElementName=TbAutoSelectTextBox}" />
+        <TextBlock Text="RealText" />
+        <TextBlock Text="{Binding RealText, ElementName=TbAutoSelectTextBox}" />
+        <CheckBox IsChecked="{Binding IsPreviewing, ElementName=TbAutoSelectTextBox}" />
+        <TextBlock Text="Auto select test" />
+        <TextBlock Text="{Binding AutoSelectText, ElementName=TbAutoSelectTextBox}" />
     </StackPanel>
 </Window>
