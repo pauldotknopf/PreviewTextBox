@@ -27,10 +27,17 @@ namespace PreviewTextBox.Demo
         {
             InitializeComponent();
             BtnChangeText.Click += BtnChangeTextOnClick;
+            BtnChangeRealText.Click += BtnChangeRealTextOnClick;
             _timer = new DispatcherTimer(DispatcherPriority.Normal, Dispatcher);
             _timer.Tick += TimerOnTick;
             _timer.Interval = TimeSpan.FromSeconds(5);
             _timer.Start();
+        }
+
+        private void BtnChangeRealTextOnClick(object sender, RoutedEventArgs routedEventArgs)
+        {
+            TbPreviewTextBox.RealText = TbChangeText.Text;
+            TbChangeText.Text = null;
         }
 
         private void BtnChangeTextOnClick(object sender, RoutedEventArgs routedEventArgs)

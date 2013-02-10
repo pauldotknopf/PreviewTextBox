@@ -20,10 +20,15 @@
                     <ColumnDefinition />
                     <ColumnDefinition Width="10" />
                     <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="10" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <TextBox x:Name="TbChangeText" />
                 <Button x:Name="BtnChangeText" Grid.Column="2">
-                    <TextBlock Text="Change" />
+                    <TextBlock Text="Change Text" />
+                </Button>
+                <Button x:Name="BtnChangeRealText" Grid.Column="4">
+                    <TextBlock Text="Change Real text" />
                 </Button>
             </Grid>
         </StackPanel>

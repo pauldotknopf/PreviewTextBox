@@ -37,8 +37,7 @@ namespace PreviewTextBox.Library
                 // settings the _IsDeleteingFlag causes the real text to be updated
                 // after the delete has actually happened
                 _isDeleting = true;
-                _ignoreNextChanged = true; // dont do any preview logic
-                RealText = Text;
+                SetRealText(Text);
             }
             else if (keyEventArgs.Key == Key.Enter)
             {
@@ -48,8 +47,22 @@ namespace PreviewTextBox.Library
                 // whe he sees.
                 if (RealText != Text)
                 {
-                    Text = RealText = PreviewText;
+                    SetRealText(PreviewText);
+                    Text = RealText;
                     SelectionStart = PreviewText.Length;
+                    IsPreviewing = false;
+                }
+            }else if(keyEventArgs.Key == Key.Left 
+                || keyEventArgs.Key == Key.Right 
+                || keyEventArgs.Key == Key.Up 
+                || keyEventArgs.Key == Key.Down)
+            {
+                // we are trying to navigate within the textbox, remove the preview text
+                if(IsPreviewing)
+                {
+                    _ignoreNextChanged = true;
+                    Text = RealText;
+                    SelectionStart = Text.Length;
                     IsPreviewing = false;
                 }
             }
@@ -109,11 +122,8 @@ namespace PreviewTextBox.Library
                                 FrameworkPropertyMetadataOptions.BindsTwoWayByDefault | FrameworkPropertyMetadataOptions.Journal, RealTextPropertyChangedCallback));
         private static void RealTextPropertyChangedCallback(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
         {
-            var previewText = dependencyObject as PreviewTextBox;
-            if (previewText == null) return;
-            var be = previewText.GetBindingExpression(RealTextProperty);
-            if(be != null)
-                be.UpdateSource();
+            var selectBox = dependencyObject as PreviewTextBox;
+            if (selectBox != null) selectBox.RealTextChanged();
         }
 
         /// <summary>
@@ -149,8 +159,6 @@ namespace PreviewTextBox.Library
         /// </summary>
         private void PreviewTextChanged()
         {
-            bool setCarrotAtEnd = IsPreviewing;
-
             // Set the new text flat out (don't preview yet)
             _ignoreNextChanged = true;
             Text = RealText;
@@ -158,8 +166,26 @@ namespace PreviewTextBox.Library
             // try to preview the text with the new preview text (if any)
             TryPreviewText(RealText, PreviewText);
 
-            if (setCarrotAtEnd)
-                SelectionStart = RealText.Length;
+            // set the carrot at the end of the real text
+            SelectionStart = RealText.Length;
+        }
+
+        private bool _isInternalRealTextSet;
+        /// <summary>
+        /// Raised when the preview text is changed
+        /// </summary>
+        private void RealTextChanged()
+        {
+            if(_isInternalRealTextSet)
+            {
+                // we don't want to update the text property when realtext is changed internally.
+                // however, if third party sources update RealText, the intend on changing the
+                // entire contents of the textbox, so we set Text in that case.
+                _isInternalRealTextSet = !_isInternalRealTextSet;
+                return;
+            }
+
+            Text = RealText;
         }
 
         /// <summary>
@@ -173,17 +199,25 @@ namespace PreviewTextBox.Library
             // we need to update the real text with what the resulting text is after the delete
             if (_isDeleting)
             {
-                RealText = Text;
+                SetRealText(Text);
                 _isDeleting = !_isDeleting;
+                return;
             }
 
+            if(!IsFocused)
+            {
+                // we update the text from another source, maybe from the view model, who cares,
+                // but we don't do anything
+                SetRealText(Text);
+                return;
+            }
 
             if (!HasPreviewText)
             {
                 // keep the real text insync, event though there is no preview text
                 // this makes it so that we can always trust RealText, even if we
-                // aren't planning in previewing text
-                RealText = Text;
+                // aren't planning on previewing text
+                SetRealText(Text);
                 return;
             }
 
@@ -199,7 +233,7 @@ namespace PreviewTextBox.Library
             // at this point, the text should be the intended users input
             // ensure that the real text is updated if needed.
             if (Text != RealText)
-                RealText = Text;
+                SetRealText(Text);
 
             // Try to preview the text
             TryPreviewText(RealText, PreviewText);
@@ -258,6 +292,16 @@ namespace PreviewTextBox.Library
             {
                 IsPreviewing = false;
             }
+        }
+
+        /// <summary>
+        /// Set RealText while not updating that actual text
+        /// </summary>
+        /// <param name="realText"></param>
+        private void SetRealText(string realText)
+        {
+            _isInternalRealTextSet = true;
+            RealText = realText;
         }
     }
 }
